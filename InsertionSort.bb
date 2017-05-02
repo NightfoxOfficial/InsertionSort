@@ -12,7 +12,6 @@ Function PopulateArray{}
   While NOT Eof(0)
     SHARED  numbers()
     numbers(count) = Edit(5)
-    Print numbers(count), " "
     count = count + 1
   Wend
   Function Return count
@@ -25,7 +24,7 @@ Statement SortArray{count.w, numA.l}
 outerLoop:
   ADDQ.w #1,d1  ;increment i
   CMP.w d0,d1 ;is i > count?
-  BGT done  ;if so, for loop is over
+  BGE done  ;if so, for loop is over
   MOVE.w  d1,d2  ;D2 = j
 
 innerLoop:
@@ -49,6 +48,21 @@ done:
   AsmExit
 End Statement
 
+Statement SaveSortedArray{count.w}
+  SHARED numbers()
+  succ.l = WriteFile(0,"sorted.txt")
+  If succ = True
+    FileOutput 0
+    For i = 0 To (count - 1)
+      NPrint numbers(i)
+    Next
+    CloseFile 0
+    DefaultOutput
+  Else
+    NPrint "Error writing to sorted.txt!"
+  EndIf
+End Statement
+
 WBStartup
 NPrint "Insertion Sort"
 NPrint "(c) Nightfox 2017"
@@ -59,6 +73,9 @@ succ.l = ReadFile(0,"numbers.txt")
 If succ = True
   NPrint "Unsorted list:"
   count.w = PopulateArray{}
+  For i = 0 To (count-1)  ;print unsorted list
+    Print numbers(i), " "
+  Next
   NPrint ""
   NPrint ""
   NPrint "The number of elements to be sorted is: ", count
@@ -69,6 +86,7 @@ If succ = True
   For i = 0 To (count-1)  ;print sorted list
     Print numbers(i), " "
   Next
+  SaveSortedArray{count}
 Else
   NPrint "Error reading numbers.txt!"
   Goto exit
@@ -76,6 +94,7 @@ EndIf
 
 exit:
 NPrint ""
+MouseWait
 End
 
 
